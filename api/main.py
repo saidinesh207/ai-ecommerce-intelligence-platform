@@ -85,13 +85,8 @@ def recommend(customer_id: int):
 
 
 @app.get("/forecast")
-def forecast():
-
-    future = forecast_model.make_future_dataframe(periods=3, freq="M")
-    forecast = forecast_model.predict(future)
-
-    future_forecast = forecast.tail(3)
-
-    result = future_forecast[["ds", "yhat"]].to_dict(orient="records")
-
-    return {"future_forecast": result}
+def get_forecast():
+    forecast_df = pd.read_csv("data/processed/future_forecast.csv")
+    return {
+        "future_forecast": forecast_df.to_dict(orient="records")
+    }

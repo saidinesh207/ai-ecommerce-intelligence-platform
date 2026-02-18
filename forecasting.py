@@ -37,3 +37,7 @@ future_forecast = forecast.tail(3)
 print("\n📈 Next 3 Months Revenue Forecast:")
 print(future_forecast[["ds", "yhat"]])
 
+# Save forecast to CSV
+forecast[['ds', 'yhat']].tail(6).to_csv("data/processed/future_forecast.csv", index=False)
+
+print("Forecast saved successfully!")
