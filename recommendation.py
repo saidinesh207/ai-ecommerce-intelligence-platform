@@ -1,13 +1,13 @@
 import pandas as pd
 from sklearn.metrics.pairwise import cosine_similarity
 
-# Load cleaned data
+print("🔄 Loading cleaned dataset...")
 df = pd.read_csv("data/processed/cleaned_data.csv")
 
-# Convert Customer ID to int (cleaner indexing)
+# Convert Customer ID to int
 df["Customer ID"] = df["Customer ID"].astype(int)
 
-# Create user-product matrix
+print("🔄 Creating user-product matrix...")
 user_product_matrix = df.pivot_table(
     index="Customer ID",
     columns="Description",
@@ -16,45 +16,45 @@ user_product_matrix = df.pivot_table(
     fill_value=0
 )
 
-# Compute similarity between users
+print("🔄 Calculating user similarity...")
 user_similarity = cosine_similarity(user_product_matrix)
 
-# Convert similarity matrix to DataFrame
 user_similarity_df = pd.DataFrame(
     user_similarity,
     index=user_product_matrix.index,
     columns=user_product_matrix.index
 )
 
-# Recommendation function
-def recommend_products(customer_id, top_n=5):
+print("🔄 Generating recommendations for all customers...")
 
-    # Get similarity scores for this customer
+recommendations_list = []
+
+for customer_id in user_product_matrix.index:
+
     similarity_scores = user_similarity_df.loc[customer_id]
-
-    # Sort by similarity (descending)
     similarity_scores = similarity_scores.sort_values(ascending=False)
 
-    # Remove the customer itself (first entry)
+    # Top 5 similar users (excluding itself)
     similar_users = similarity_scores.iloc[1:6]
-
     similar_user_ids = similar_users.index
 
-    # Get products bought by similar users
     similar_user_products = user_product_matrix.loc[similar_user_ids]
-
     product_scores = similar_user_products.sum().sort_values(ascending=False)
 
-    # Remove already purchased products
     customer_products = user_product_matrix.loc[customer_id]
     already_bought = customer_products[customer_products > 0].index
 
-    recommendations = product_scores.drop(already_bought).head(top_n)
+    recommended_products = product_scores.drop(already_bought).head(5)
 
-    return recommendations
+    for product in recommended_products.index:
+        recommendations_list.append({
+            "Customer ID": customer_id,
+            "Recommended Product": product
+        })
 
-# Test with first customer
-test_customer = user_product_matrix.index[0]
+recommendations_df = pd.DataFrame(recommendations_list)
 
-print(f"\nRecommendations for Customer {test_customer}:")
-print(recommend_products(test_customer))
+# Save file for API use
+recommendations_df.to_csv("data/processed/recommendations.csv", index=False)
+
+print("✅ recommendations.csv created successfully!")

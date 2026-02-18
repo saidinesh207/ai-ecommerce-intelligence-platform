@@ -1,7 +1,10 @@
 from fastapi import FastAPI
 import pandas as pd
+import os
 
 app = FastAPI(title="AI E-Commerce Backend")
+
+BASE_PATH = "data/processed"
 
 # -----------------------------
 # Root Endpoint
@@ -16,7 +19,14 @@ def home():
 # -----------------------------
 @app.get("/forecast")
 def get_forecast():
-    forecast_df = pd.read_csv("data/processed/future_forecast.csv")
+
+    forecast_path = os.path.join(BASE_PATH, "future_forecast.csv")
+
+    if not os.path.exists(forecast_path):
+        return {"error": "Forecast file not found"}
+
+    forecast_df = pd.read_csv(forecast_path)
+
     return {
         "future_forecast": forecast_df.to_dict(orient="records")
     }
@@ -28,20 +38,19 @@ def get_forecast():
 @app.get("/recommend/{customer_id}")
 def recommend(customer_id: int):
 
-    # Load precomputed recommendation file
-    try:
-        rec_df = pd.read_csv("data/processed/recommendations.csv")
-    except:
+    rec_path = os.path.join(BASE_PATH, "recommendations.csv")
+
+    if not os.path.exists(rec_path):
         return {"error": "Recommendation file not found"}
+
+    rec_df = pd.read_csv(rec_path)
 
     customer_data = rec_df[rec_df["Customer ID"] == customer_id]
 
     if customer_data.empty:
         return {"error": "Customer ID not found"}
 
-    products = customer_data["Recommended Product"].tolist()
-
     return {
         "customer_id": customer_id,
-        "recommended_products": products
+        "recommended_products": list(customer_data["Recommended Product"])
     }
