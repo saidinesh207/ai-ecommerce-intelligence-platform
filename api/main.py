@@ -7,7 +7,7 @@ app = FastAPI(title="AI-Powered E-Commerce Intelligence Platform")
 BASE_PATH = "data/processed"
 
 # -----------------------------
-# Root Endpoint (Project Info)
+# Root Endpoint
 # -----------------------------
 @app.get("/")
 def home():
