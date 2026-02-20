@@ -2,16 +2,25 @@ from fastapi import FastAPI
 import pandas as pd
 import os
 
-app = FastAPI(title="AI E-Commerce Backend")
+app = FastAPI(title="AI-Powered E-Commerce Intelligence Platform")
 
 BASE_PATH = "data/processed"
 
 # -----------------------------
-# Root Endpoint
+# Root Endpoint (Project Info)
 # -----------------------------
 @app.get("/")
 def home():
-    return {"message": "AI E-Commerce Backend Running 🚀"}
+    return {
+        "project": "AI-Powered E-Commerce Intelligence Platform",
+        "description": "This system provides revenue forecasting and personalized product recommendations using AI.",
+        "available_endpoints": {
+            "Forecast": "/forecast",
+            "Recommendation": "/recommend/{customer_id}",
+            "API Docs": "/docs"
+        },
+        "status": "Running"
+    }
 
 
 # -----------------------------
